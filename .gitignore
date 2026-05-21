@@ -22,7 +22,7 @@
 .vercel
 .vercel/output
 .vercel/project.json
-**/.vercel
+**/.vercel  
 **/.vercel/**
 vercel.json 
 # Firebase (Chaves, caches do CLI e logs de depuração - Portfólio & Admin)
