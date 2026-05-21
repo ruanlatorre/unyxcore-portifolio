@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../utils/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+import { db, auth } from '../utils/firebase';
 
 const AuthContext = createContext(null);
 
@@ -16,68 +17,55 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = sessionStorage.getItem('unyx_auth_user');
-    if (storedUser) {
-      try {
-        const parsed = JSON.parse(storedUser);
-        setUser({ uid: parsed.uid, email: parsed.email });
-        setUserData(parsed);
-      } catch (error) {
-        console.error('Erro ao restaurar sessão do usuário:', error);
-        sessionStorage.removeItem('unyx_auth_user');
+    // Escuta as mudanças de estado de autenticação em tempo real
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          // Busca as informações adicionais do usuário (role, nome) no Firestore
+          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            const userPayload = {
+              uid: firebaseUser.uid,
+              nome: data.nome || data.name || 'Usuário',
+              email: firebaseUser.email,
+              role: data.role || 'user',
+            };
+            setUser({ uid: firebaseUser.uid, email: firebaseUser.email });
+            setUserData(userPayload);
+          } else {
+            // Fallback caso não tenha documento no Firestore ainda
+            setUser({ uid: firebaseUser.uid, email: firebaseUser.email });
+            setUserData({ role: 'user', nome: 'Usuário', email: firebaseUser.email });
+          }
+        } catch (error) {
+          console.error('Erro ao buscar dados do usuário:', error);
+        }
+      } else {
+        // Deslogado
+        setUser(null);
+        setUserData(null);
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const login = async (email, password) => {
     try {
-      const q = query(collection(db, 'users'), where('email', '==', email.toLowerCase()));
-      const querySnapshot = await getDocs(q);
-      
-      if (querySnapshot.empty) {
-        const err = new Error('Usuário não encontrado.');
-        err.code = 'auth/user-not-found';
-        throw err;
-      }
-
-      let matchedUser = null;
-      querySnapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        if (data.password === password) {
-          matchedUser = { uid: docSnap.id, ...data };
-        }
-      });
-
-      if (!matchedUser) {
-        const err = new Error('Senha incorreta.');
-        err.code = 'auth/wrong-password';
-        throw err;
-      }
-
-      // Login bem sucedido
-      const userPayload = {
-        uid: matchedUser.uid,
-        nome: matchedUser.nome,
-        email: matchedUser.email,
-        role: matchedUser.role,
-      };
-
-      setUser({ uid: userPayload.uid, email: userPayload.email });
-      setUserData(userPayload);
-      sessionStorage.setItem('unyx_auth_user', JSON.stringify(userPayload));
-      return userPayload;
+      // Faz o login de forma segura usando o Firebase Auth
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      return userCredential.user;
     } catch (error) {
-      console.error('Erro durante login customizado:', error);
+      console.error('Erro durante login oficial:', error);
       throw error;
     }
   };
 
   const logout = async () => {
     try {
-      sessionStorage.removeItem('unyx_auth_user');
-      setUser(null);
-      setUserData(null);
+      await signOut(auth);
     } catch (error) {
       console.error('Erro ao deslogar:', error);
     }
@@ -93,7 +81,7 @@ export function AuthProvider({ children }) {
     isVendedor: userData?.role === 'vendedor',
     isDev: userData?.role === 'desenvolvedor',
     role: userData?.role || null,
-    userName: userData?.nome || user?.email || 'Usuário',
+    userName: userData?.nome || userData?.name || user?.email || 'Usuário',
   };
 
   return (
