@@ -1,5 +1,6 @@
-# Ambiente e Variáveis de Configuração
+# Ambiente e Variáveis de Configuração (Portfólio & Admin)
 .env
+.env.*
 .env.local
 .env.development
 .env.production
@@ -7,22 +8,46 @@
 .env.preview
 .env.*.local
 .env.test
+**/.env
+**/.env.*
+**/.env.local
+**/.env.development
+**/.env.production
+**/.env.staging
+**/.env.preview
+**/.env.*.local
+**/.env.test
 
-# Vercel
+# Vercel (Portfólio & Admin)
 .vercel
 .vercel/output
 .vercel/project.json
+**/.vercel
+**/.vercel/**
 
-# Firebase
+# Firebase (Chaves, caches do CLI e logs de depuração - Portfólio & Admin)
+.firebase/
+**/.firebase/
+**/.firebase/**
+.firebaserc.local
+**/.firebaserc.local
 serviceAccountKey.json
+**/serviceAccountKey.json
 *-firebase-adminsdk-*.json
+**/*-firebase-adminsdk-*.json
 *.key.json
+**/*.key.json
 .runtimeconfig.json
+**/.runtimeconfig.json
 firebase-debug.log
 firestore-debug.log
 storage-debug.log
 ui-debug.log
-.firebaserc.local
+**/firebase-debug.log
+**/firestore-debug.log
+**/storage-debug.log
+**/ui-debug.log
+**/*.log
 
 # Certificados, chaves e credenciais
 *.pem
@@ -96,3 +121,6 @@ src/assets/uploads/
 *.private
 secrets/
 credentials/
+
+# O próprio arquivo do git ignore
+.gitignore

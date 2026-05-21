@@ -2,7 +2,10 @@ import { useEffect, useRef } from 'react';
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 
+// --- Landing Page Imports ---
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import Hero from './components/sections/Hero';
@@ -14,9 +17,24 @@ import Metrics from './components/sections/Metrics';
 import Testimonials from './components/sections/Testimonials';
 import CTA from './components/sections/CTA';
 
+// --- Admin Imports ---
+import ProtectedRoute from './components/admin/ProtectedRoute';
+import LoginAdm from './pages/LoginAdm';
+import AdminLayout from './pages/AdminLayout';
+import AdminDashboard from './pages/AdminDashboard';
+import GerenciarUsuarios from './pages/GerenciarUsuarios';
+import CadastrarVenda from './pages/vendedor/CadastrarVenda';
+import PainelEntregas from './pages/vendedor/PainelEntregas';
+import HistoricoVendas from './pages/vendedor/HistoricoVendas';
+import FilaProjetos from './pages/desenvolvedor/FilaProjetos';
+import MeusProjetos from './pages/desenvolvedor/MeusProjetos';
+
+import './admin.css';
+
 gsap.registerPlugin(ScrollTrigger);
 
-function App() {
+// --- Componente da Landing Page ---
+function LandingPage() {
   const cursorRef = useRef(null);
 
   useEffect(() => {
@@ -72,22 +90,22 @@ function App() {
 
     window.addEventListener('mousemove', handleMouseMove);
 
-    // 4. Custom Cursor Hover Expansion Effect (Event Delegation)
+    // 4. Custom Cursor Hover Expansion Effect
     const handleMouseOver = (e) => {
       const target = e.target.closest('a, button, [role="button"], .glass-card, .cursor-pointer');
       if (cursorRef.current) {
         if (target) {
           gsap.to(cursorRef.current, {
             scale: 1.8,
-            backgroundColor: "rgba(124, 58, 237, 0.15)", // roxo claro semitransparente
-            borderColor: "rgba(210, 187, 255, 0.9)", // borda lilás forte
+            backgroundColor: "rgba(124, 58, 237, 0.15)",
+            borderColor: "rgba(210, 187, 255, 0.9)",
             duration: 0.3
           });
         } else {
           gsap.to(cursorRef.current, {
             scale: 1,
-            backgroundColor: "rgba(124, 58, 237, 0.3)", // original
-            borderColor: "rgba(210, 187, 255, 0.5)", // original
+            backgroundColor: "rgba(124, 58, 237, 0.3)",
+            borderColor: "rgba(210, 187, 255, 0.5)",
             duration: 0.3
           });
         }
@@ -108,12 +126,12 @@ function App() {
   return (
     <>
       {/* Premium Custom Cursor */}
-      <div 
-        ref={cursorRef} 
+      <div
+        ref={cursorRef}
         className="fixed top-0 left-0 w-8 h-8 rounded-full bg-primary-container/30 border border-primary/50 pointer-events-none z-[100] transform -translate-x-1/2 -translate-y-1/2 backdrop-blur-sm tech-glow hidden md:block"
         style={{ mixBlendMode: 'screen' }}
       ></div>
-      
+
       <Navbar />
       <main>
         <Hero />
@@ -130,4 +148,87 @@ function App() {
   );
 }
 
-export default App;
+// --- Componente Principal ---
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Rotas Públicas */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/loginadm" element={<LoginAdm />} />
+
+          {/* Painel Administrativo Protegido */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            {/* Dashboard Visível para Todos os Logados */}
+            <Route index element={<AdminDashboard />} />
+
+            {/* Rotas exclusivas de Vendedores e Administradores */}
+            <Route
+              path="cadastrar-venda"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'vendedor']}>
+                  <CadastrarVenda />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="entregas"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'vendedor']}>
+                  <PainelEntregas />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="historico"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'vendedor']}>
+                  <HistoricoVendas />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Rotas exclusivas de Desenvolvedores e Administradores */}
+            <Route
+              path="fila-projetos"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'desenvolvedor']}>
+                  <FilaProjetos />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="meus-projetos"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'desenvolvedor']}>
+                  <MeusProjetos />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Rota exclusiva do Administrador */}
+            <Route
+              path="gerenciar-usuarios"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <GerenciarUsuarios />
+                </ProtectedRoute>
+              }
+            />
+          </Route>
+
+          {/* Redirecionar rotas não encontradas para a página inicial */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}
