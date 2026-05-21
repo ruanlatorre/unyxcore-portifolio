@@ -1,0 +1,98 @@
+# Ambiente e Variáveis de Configuração
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+.env.preview
+.env.*.local
+.env.test
+
+# Vercel
+.vercel
+.vercel/output
+.vercel/project.json
+
+# Firebase
+serviceAccountKey.json
+*-firebase-adminsdk-*.json
+*.key.json
+.runtimeconfig.json
+firebase-debug.log
+firestore-debug.log
+storage-debug.log
+ui-debug.log
+.firebaserc.local
+
+# Certificados, chaves e credenciais
+*.pem
+*.key
+*.p12
+*.pfx
+*.cert
+*.crt
+id_rsa
+id_rsa.pub
+
+# Dependências
+node_modules
+node_modules/
+**/node_modules/
+**/node_modules/**
+admin/node_modules/
+admin/node_modules/**
+.pnp
+.pnp.js
+
+# Diretórios de compilação (Build e cache)
+dist/
+dist/**
+dist-ssr/
+build/
+build/**
+admin/dist/
+admin/dist/**
+.vite/
+.vite/**
+.cache/
+.cache/**
+*.local
+out/
+out/**
+
+# Source maps de produção
+dist/**/*.map
+build/**/*.map
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDEs e Sistema Operacional
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# Testes e relatórios
+cypress/fixtures/real-data.*
+__tests__/data/users.*
+coverage/
+
+# Uploads locais
+public/uploads/
+src/assets/uploads/
+
+# Arquivos sensíveis diversos
+*.secret
+*.private
+secrets/
+credentials/
