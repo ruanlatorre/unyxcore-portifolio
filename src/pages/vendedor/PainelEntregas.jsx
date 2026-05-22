@@ -13,7 +13,13 @@ export default function PainelEntregas() {
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'sales'), (snapshot) => {
       const data = snapshot.docs
-        .map((d) => ({ id: d.id, ...d.data() }))
+        .map((d) => {
+          const sale = { id: d.id, ...d.data() };
+          if (sale.vendedorNome) sale.vendedorNome = sale.vendedorNome.replace(/Unyxcore/gi, 'Unyx Core');
+          if (sale.devNome) sale.devNome = sale.devNome.replace(/Unyxcore/gi, 'Unyx Core');
+          if (sale.collaboratorNome) sale.collaboratorNome = sale.collaboratorNome.replace(/Unyxcore/gi, 'Unyx Core');
+          return sale;
+        })
         .filter((s) => s.status === 'entregue_dev' || s.status === 'revisao')
         .filter((s) => isAdmin || s.vendedorId === user?.uid);
       setSales(data);

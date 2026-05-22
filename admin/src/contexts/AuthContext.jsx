@@ -58,7 +58,7 @@ export function AuthProvider({ children }) {
       // Login bem sucedido
       const userPayload = {
         uid: matchedUser.uid,
-        nome: matchedUser.nome,
+        nome: (matchedUser.nome || '').replace(/Unyxcore/gi, 'Unyx Core'),
         email: matchedUser.email,
         role: matchedUser.role,
       };
@@ -93,7 +93,7 @@ export function AuthProvider({ children }) {
     isVendedor: userData?.role === 'vendedor',
     isDev: userData?.role === 'desenvolvedor',
     role: userData?.role || null,
-    userName: userData?.nome || user?.email || 'Usuário',
+    userName: (userData?.nome || user?.email || 'Usuário').replace(/Unyxcore/gi, 'Unyx Core'),
   };
 
   return (

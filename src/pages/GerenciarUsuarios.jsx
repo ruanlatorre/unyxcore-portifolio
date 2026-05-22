@@ -22,10 +22,16 @@ export default function GerenciarUsuarios() {
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'users'), (snapshot) => {
-      const usersList = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const usersList = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        if (data.nome) {
+          data.nome = data.nome.replace(/Unyxcore/gi, 'Unyx Core');
+        }
+        return {
+          id: doc.id,
+          ...data,
+        };
+      });
       setUsers(usersList);
       setLoading(false);
     }, (error) => {

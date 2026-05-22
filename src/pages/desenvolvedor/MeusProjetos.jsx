@@ -48,7 +48,13 @@ export default function MeusProjetos() {
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'sales'), (snapshot) => {
-      const all = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const all = snapshot.docs.map((d) => {
+        const data = d.data();
+        if (data.vendedorNome) data.vendedorNome = data.vendedorNome.replace(/Unyxcore/gi, 'Unyx Core');
+        if (data.devNome) data.devNome = data.devNome.replace(/Unyxcore/gi, 'Unyx Core');
+        if (data.collaboratorNome) data.collaboratorNome = data.collaboratorNome.replace(/Unyxcore/gi, 'Unyx Core');
+        return { id: d.id, ...data };
+      });
       const mine = all.filter(
         (s) =>
           (s.devId === user?.uid || s.collaboratorId === user?.uid) &&
@@ -68,7 +74,12 @@ export default function MeusProjetos() {
       where('status', '==', 'pendente')
     );
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      const list = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        if (data.fromDevNome) data.fromDevNome = data.fromDevNome.replace(/Unyxcore/gi, 'Unyx Core');
+        if (data.toDevNome) data.toDevNome = data.toDevNome.replace(/Unyxcore/gi, 'Unyx Core');
+        return { id: doc.id, ...data };
+      });
       setInvites(list);
     });
     return () => unsubscribe();

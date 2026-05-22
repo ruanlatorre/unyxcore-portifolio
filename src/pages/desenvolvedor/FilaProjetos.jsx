@@ -17,7 +17,13 @@ export default function FilaProjetos() {
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'sales'), (snapshot) => {
-      const all = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const all = snapshot.docs.map((d) => {
+        const data = d.data();
+        if (data.vendedorNome) data.vendedorNome = data.vendedorNome.replace(/Unyxcore/gi, 'Unyx Core');
+        if (data.devNome) data.devNome = data.devNome.replace(/Unyxcore/gi, 'Unyx Core');
+        if (data.collaboratorNome) data.collaboratorNome = data.collaboratorNome.replace(/Unyxcore/gi, 'Unyx Core');
+        return { id: d.id, ...data };
+      });
       
       // Projetos disponíveis
       const available = all.filter((s) => s.status === 'disponivel');
