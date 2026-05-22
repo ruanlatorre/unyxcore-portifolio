@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { collection, onSnapshot, doc, updateDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../utils/firebase';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSettings } from '../../contexts/SettingsContext';
 import StatusBadge from '../../components/admin/StatusBadge';
 import toast from 'react-hot-toast';
 import { Grab, AlertTriangle, Calendar, DollarSign, User, FileText } from 'lucide-react';
@@ -11,6 +12,7 @@ const MAX_COMBINED_PROJECTS = 3;
 
 export default function FilaProjetos() {
   const { user, userName } = useAuth();
+  const { projectLayout } = useSettings();
   const [sales, setSales] = useState([]);
   const [ownCount, setOwnCount] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
@@ -114,6 +116,64 @@ export default function FilaProjetos() {
           <div className="text-4xl mb-4">🎉</div>
           <p className="text-on-surface-variant text-lg font-medium">Nenhum projeto na fila</p>
           <p className="text-on-surface-variant/50 text-sm mt-1">Quando vendedores cadastrarem novas vendas, elas aparecerão aqui.</p>
+        </div>
+      ) : projectLayout === 'list' ? (
+        <div className="flex flex-col gap-3">
+          {sales.map((sale) => (
+            <div
+              key={sale.id}
+              className="glass-card rounded-xl p-4 hover:border-primary/20 transition-all duration-300 flex flex-col md:flex-row md:items-center justify-between gap-4 group shadow-sm hover:shadow-md"
+            >
+              <div className="flex-1 min-w-0 space-y-2">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="text-xs font-label-caps tracking-wider text-primary bg-primary-container/10 px-2.5 py-1 rounded-full">
+                    {sale.siteType}
+                  </span>
+                  <StatusBadge status={sale.status} />
+                  <h3 className="text-base font-bold text-on-surface flex items-center gap-2 truncate">
+                    <User size={16} className="text-on-surface-variant flex-shrink-0" />
+                    {sale.clientName}
+                  </h3>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-sm text-on-surface-variant">
+                  <div className="flex items-center gap-1.5 font-semibold text-on-surface">
+                    <DollarSign size={14} className="text-primary" />
+                    <span>
+                      R$ {(sale.netValue !== undefined ? sale.netValue : sale.value)?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </span>
+                    {sale.netValue !== undefined && (
+                      <span className="text-xs text-on-surface-variant/50 font-normal">
+                        (Líquido Dev)
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Calendar size={14} className="text-primary" />
+                    <span>Prazo: {sale.deadline || 'Não definido'}</span>
+                  </div>
+                  <span className="text-xs text-on-surface-variant/40">
+                    Vendedor: {sale.vendedorNome}
+                  </span>
+                </div>
+
+                {sale.description && (
+                  <p className="text-xs text-on-surface-variant/60 line-clamp-1 border-l-2 border-outline-variant/30 pl-2">
+                    {sale.description}
+                  </p>
+                )}
+              </div>
+
+              <button
+                onClick={() => handleGrab(sale)}
+                disabled={anyLimitReached}
+                className="md:w-auto w-full flex items-center justify-center gap-2 bg-primary-container text-on-primary-container px-5 py-2.5 rounded-xl font-bold text-sm tracking-wide hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-md shadow-primary-container/15 flex-shrink-0"
+              >
+                <Grab size={15} />
+                <span>Pegar</span>
+              </button>
+            </div>
+          ))}
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">

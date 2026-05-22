@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { collection, onSnapshot, doc, updateDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSettings } from '../../contexts/SettingsContext';
 import StatusBadge from '../../components/admin/StatusBadge';
 import toast from 'react-hot-toast';
 import { Grab, AlertTriangle, Calendar, DollarSign, User, FileText } from 'lucide-react';

@@ -2,7 +2,7 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   LayoutDashboard, ShoppingCart, PackageCheck, History,
-  FolderKanban, Rocket, Users, LogOut, Shield, ChevronLeft, ChevronRight, AlertTriangle
+  FolderKanban, Rocket, Users, LogOut, Shield, ChevronLeft, ChevronRight, AlertTriangle, Settings
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -11,6 +11,7 @@ const menuVendedor = [
   { label: 'Cadastrar Venda', icon: ShoppingCart, path: '/admin/cadastrar-venda' },
   { label: 'Painel de Entregas', icon: PackageCheck, path: '/admin/entregas' },
   { label: 'Histórico', icon: History, path: '/admin/historico' },
+  { label: 'Configurações', icon: Settings, path: '/admin/configuracoes' },
 ];
 
 const menuDev = [
@@ -18,6 +19,7 @@ const menuDev = [
   { label: 'Fila de Projetos', icon: FolderKanban, path: '/admin/fila-projetos' },
   { label: 'Meus Projetos', icon: Rocket, path: '/admin/meus-projetos' },
   { label: 'Revisão', icon: AlertTriangle, path: '/admin/meus-projetos?tab=revisao' },
+  { label: 'Configurações', icon: Settings, path: '/admin/configuracoes' },
 ];
 
 const menuAdmin = [
@@ -29,6 +31,7 @@ const menuAdmin = [
   { label: 'Fila de Projetos', icon: FolderKanban, path: '/admin/fila-projetos' },
   { label: 'Meus Projetos', icon: Rocket, path: '/admin/meus-projetos' },
   { label: 'Revisão', icon: AlertTriangle, path: '/admin/meus-projetos?tab=revisao' },
+  { label: 'Configurações', icon: Settings, path: '/admin/configuracoes' },
 ];
 
 export default function AdminSidebar() {

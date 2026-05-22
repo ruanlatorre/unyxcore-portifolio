@@ -2,21 +2,75 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --background: #12121e;
+  --on-background: #e2e1f1;
+  --on-surface: #e2e1f1;
+  --surface: #12121e;
+  --surface-container-lowest: #0c0d18;
+  --surface-container-low: #1a1b26;
+  --surface-container: #1e1f2a;
+  --surface-container-high: #282935;
+  --surface-container-highest: #333440;
+  --on-surface-variant: #ccc3d8;
+  --outline-variant: #4a4455;
+  --primary: #d2bbff;
+  --primary-container: #7c3aed;
+  --on-primary-container: #ede0ff;
+  --secondary-container: #4b4a53;
+  --on-secondary-container: #bdbac4;
+  --surface-variant: #333440;
+  --surface-bright: #383845;
+  
+  --glass-bg: rgba(10, 10, 15, 0.7);
+  --glass-border: rgba(240, 238, 255, 0.1);
+  --glass-glow: rgba(210, 187, 255, 0.3);
+  --glass-glow-from: rgba(124, 58, 237, 0.12);
+}
+
+:root.light {
+  --background: #f8f7fa;
+  --on-background: #1e1d24;
+  --on-surface: #1e1d24;
+  --surface: #ffffff;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f1eff5;
+  --surface-container: #e7e4ee;
+  --surface-container-high: #dedae8;
+  --surface-container-highest: #d2cde0;
+  --on-surface-variant: #49454f;
+  --outline-variant: #cac4d0;
+  --primary: #6200ee;
+  --primary-container: #eaddff;
+  --on-primary-container: #21005d;
+  --secondary-container: #e8def8;
+  --on-secondary-container: #1d192b;
+  --surface-variant: #e7e0ec;
+  --surface-bright: #fdf8fd;
+  
+  --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-border: rgba(98, 0, 238, 0.08);
+  --glass-glow: rgba(98, 0, 238, 0.15);
+  --glass-glow-from: rgba(98, 0, 238, 0.04);
+}
+
 @layer base {
   body {
     @apply bg-background text-on-surface font-body-md;
-    background-color: #12121e;
-    color: #e2e1f1;
+    background-color: var(--background);
+    color: var(--on-surface);
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
 
 @layer components {
   .glass-card {
-    background: rgba(10, 10, 15, 0.7);
+    background: var(--glass-bg);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(240, 238, 255, 0.1);
+    border: 1px solid var(--glass-border);
     position: relative;
     overflow: hidden;
+    transition: background 0.3s ease, border-color 0.3s ease;
   }
   
   .glass-card::before {
@@ -26,7 +80,7 @@
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(210, 187, 255, 0.3), transparent);
+    background: linear-gradient(90deg, transparent, var(--glass-glow), transparent);
   }
   
   .tech-glow {
@@ -34,8 +88,9 @@
   }
   
   .mesh-bg {
-    background-image: radial-gradient(circle at 50% -20%, rgba(124, 58, 237, 0.12), transparent 70%),
-                      radial-gradient(circle at 100% 100%, rgba(18, 18, 30, 1), rgba(10, 10, 15, 1));
+    background-image: radial-gradient(circle at 50% -20%, var(--glass-glow-from), transparent 70%),
+                      radial-gradient(circle at 100% 100%, var(--background), var(--surface-container-lowest));
+    transition: background-image 0.3s ease;
   }
 
   .no-scrollbar::-webkit-scrollbar {
