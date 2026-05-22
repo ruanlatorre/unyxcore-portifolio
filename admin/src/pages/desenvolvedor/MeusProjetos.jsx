@@ -3,6 +3,7 @@ import { collection, onSnapshot, doc, updateDoc, serverTimestamp, query, where }
 import { useSearchParams } from 'react-router-dom';
 import { db } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSettings } from '../../contexts/SettingsContext';
 import StatusBadge from '../../components/admin/StatusBadge';
 import ConvidarColaborador from './ConvidarColaborador';
 import toast from 'react-hot-toast';
@@ -10,6 +11,7 @@ import { Send, Link2, Users, Calendar, DollarSign, ExternalLink, Inbox, Check, X
 
 export default function MeusProjetos() {
   const { user, userName } = useAuth();
+  const { projectLayout } = useSettings();
   const [projects, setProjects] = useState([]);
   const [invites, setInvites] = useState([]);
   const [deliveryUrls, setDeliveryUrls] = useState({});
@@ -218,6 +220,116 @@ export default function MeusProjetos() {
               <p className="text-on-surface-variant text-lg font-medium">Nenhum projeto em andamento</p>
               <p className="text-on-surface-variant/50 text-sm mt-1">Vá até a Fila de Projetos para pegar um.</p>
             </div>
+          ) : projectLayout === 'list' ? (
+            <div className="flex flex-col gap-3">
+              {activeDevProjects.map((sale) => (
+                <div
+                  key={sale.id}
+                  className="glass-card rounded-xl p-4 hover:border-primary/20 transition-all duration-300 flex flex-col gap-4 shadow-sm hover:shadow-md"
+                >
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <h3 className="text-base font-bold text-on-surface flex items-center gap-2 truncate">
+                          {sale.clientName}
+                        </h3>
+                        <StatusBadge status={sale.status} />
+                        <span className="text-xs font-label-caps tracking-wider text-primary bg-primary-container/10 px-2 py-0.5 rounded-full">
+                          {sale.siteType}
+                        </span>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-sm text-on-surface-variant">
+                        <div className="flex items-center gap-1.5 font-semibold text-on-surface">
+                          <DollarSign size={14} className="text-primary" />
+                          <span>
+                            R$ {sale.valueSplit
+                              ? (sale.devId === user?.uid ? sale.valueSplit.dev : sale.valueSplit.collaborator)?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+                              : (sale.netValue !== undefined ? sale.netValue : sale.value)?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+                            }
+                          </span>
+                          {sale.valueSplit && <span className="text-xs text-on-surface-variant/50 font-normal">(sua parte)</span>}
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Calendar size={14} className="text-primary" />
+                          <span>Prazo: {sale.deadline || '—'}</span>
+                        </div>
+                        {sale.collaboratorNome && (
+                          <div className="flex items-center gap-1.5 text-xs text-on-surface-variant/80">
+                            <Users size={12} className="text-blue-400" />
+                            <span>Parceiro: {sale.collaboratorNome}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Links/Status para visualizadores ou não-titulares */}
+                    {(sale.status !== 'em_desenvolvimento' || sale.devId !== user?.uid) && (
+                      <div className="flex items-center gap-3">
+                        {sale.collaboratorId === user?.uid && (
+                          <span className="text-xs text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full font-medium">
+                            Colaborador
+                          </span>
+                        )}
+                        {sale.deliveryUrl && (
+                          <a
+                            href={sale.deliveryUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline bg-primary-container/10 px-3 py-1.5 rounded-lg font-medium"
+                          >
+                            <ExternalLink size={14} /> Ver Site
+                          </a>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Ações rápidas */}
+                    {sale.status === 'em_desenvolvimento' && sale.devId === user?.uid && (
+                      <div className="flex flex-wrap items-center gap-2">
+                        {!sale.collaboratorId && (
+                          <button
+                            onClick={() => setInviteModalSale(sale)}
+                            className="flex items-center justify-center gap-1.5 bg-blue-500/20 text-blue-400 px-3.5 py-2 rounded-xl text-xs font-semibold hover:bg-blue-500/30 transition-all active:scale-95 flex-shrink-0"
+                          >
+                            <Users size={14} />
+                            Convidar
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {sale.description && (
+                    <p className="text-xs text-on-surface-variant/60 line-clamp-1 border-l-2 border-outline-variant/30 pl-2">
+                      {sale.description}
+                    </p>
+                  )}
+
+                  {/* Input de entrega inline elegante */}
+                  {sale.status === 'em_desenvolvimento' && sale.devId === user?.uid && (
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-3 border-t border-outline-variant/10">
+                      <div className="flex-1 flex items-center gap-2 bg-surface-container/30 border border-outline-variant/10 rounded-xl px-3 py-1.5">
+                        <Link2 size={14} className="text-on-surface-variant/50" />
+                        <input
+                          value={deliveryUrls[sale.id] || ''}
+                          onChange={(e) => setDeliveryUrls((prev) => ({ ...prev, [sale.id]: e.target.value }))}
+                          placeholder="Insira o link do site para entregar (https://...)"
+                          className="w-full bg-transparent border-none text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none text-xs"
+                        />
+                      </div>
+                      <button
+                        onClick={() => handleDeliver(sale)}
+                        className="flex items-center justify-center gap-1.5 bg-emerald-500/20 text-emerald-400 px-5 py-2.5 rounded-xl text-xs font-semibold hover:bg-emerald-500/30 transition-all active:scale-95 whitespace-nowrap"
+                      >
+                        <Send size={14} />
+                        Entregar Site
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="grid gap-6">
               {activeDevProjects.map((sale) => (
@@ -342,6 +454,105 @@ export default function MeusProjetos() {
               <div className="text-4xl mb-4">✨</div>
               <p className="text-on-surface-variant text-lg font-medium">Nenhum projeto em revisão</p>
               <p className="text-on-surface-variant/50 text-sm mt-1">Quando projetos precisarem de ajustes, eles aparecerão aqui.</p>
+            </div>
+          ) : projectLayout === 'list' ? (
+            <div className="flex flex-col gap-3">
+              {reviewProjects.map((sale) => (
+                <div
+                  key={sale.id}
+                  className="glass-card rounded-xl p-4 hover:border-primary/20 transition-all duration-300 flex flex-col gap-3 shadow-sm hover:shadow-md"
+                >
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <h3 className="text-base font-bold text-on-surface flex items-center gap-2 truncate">
+                          {sale.clientName}
+                        </h3>
+                        <StatusBadge status={sale.status} />
+                        <span className="text-xs font-label-caps tracking-wider text-primary bg-primary-container/10 px-2 py-0.5 rounded-full">
+                          {sale.siteType}
+                        </span>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-sm text-on-surface-variant">
+                        <div className="flex items-center gap-1.5 font-semibold text-on-surface">
+                          <DollarSign size={14} className="text-primary" />
+                          <span>
+                            R$ {sale.valueSplit
+                              ? (sale.devId === user?.uid ? sale.valueSplit.dev : sale.valueSplit.collaborator)?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+                              : (sale.netValue !== undefined ? sale.netValue : sale.value)?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+                            }
+                          </span>
+                          {sale.valueSplit && <span className="text-xs text-on-surface-variant/50 font-normal">(sua parte)</span>}
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Calendar size={14} className="text-primary" />
+                          <span>Prazo: {sale.deadline || '—'}</span>
+                        </div>
+                        {sale.collaboratorNome && (
+                          <div className="flex items-center gap-1.5 text-xs text-on-surface-variant/80">
+                            <Users size={12} className="text-blue-400" />
+                            <span>Parceiro: {sale.collaboratorNome}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Links para colaboradores ou não titulares */}
+                    {(sale.devId !== user?.uid) && (
+                      <div className="flex items-center gap-3">
+                        {sale.collaboratorId === user?.uid && (
+                          <span className="text-xs text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full font-medium">
+                            Colaborador
+                          </span>
+                        )}
+                        {sale.deliveryUrl && (
+                          <a
+                            href={sale.deliveryUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline bg-primary-container/10 px-3 py-1.5 rounded-lg font-medium"
+                          >
+                            <ExternalLink size={14} /> Ver Última Entrega
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {sale.adjustmentsDescription && (
+                    <div className="flex items-start gap-2 text-xs text-rose-400 bg-rose-500/5 border border-rose-500/10 rounded-xl p-3">
+                      <AlertTriangle size={15} className="mt-0.5 flex-shrink-0" />
+                      <div>
+                        <span className="font-bold">Ajustes Solicitados:</span>
+                        <p className="mt-0.5 text-on-surface-variant">{sale.adjustmentsDescription}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Input de re-entrega inline */}
+                  {sale.devId === user?.uid && (
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-3 border-t border-outline-variant/10">
+                      <div className="flex-1 flex items-center gap-2 bg-surface-container/30 border border-outline-variant/10 rounded-xl px-3 py-1.5">
+                        <Link2 size={14} className="text-on-surface-variant/50" />
+                        <input
+                          value={deliveryUrls[sale.id] || ''}
+                          onChange={(e) => setDeliveryUrls((prev) => ({ ...prev, [sale.id]: e.target.value }))}
+                          placeholder="Insira o novo link do site para re-entregar (https://...)"
+                          className="w-full bg-transparent border-none text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none text-xs"
+                        />
+                      </div>
+                      <button
+                        onClick={() => handleDeliver(sale)}
+                        className="flex items-center justify-center gap-1.5 bg-emerald-500/20 text-emerald-400 px-5 py-2.5 rounded-xl text-xs font-semibold hover:bg-emerald-500/30 transition-all active:scale-95 whitespace-nowrap"
+                      >
+                        <Send size={14} />
+                        Re-entregar Site
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           ) : (
             <div className="grid gap-6">
