@@ -28,6 +28,8 @@ import PainelEntregas from './pages/vendedor/PainelEntregas';
 import HistoricoVendas from './pages/vendedor/HistoricoVendas';
 import FilaProjetos from './pages/desenvolvedor/FilaProjetos';
 import MeusProjetos from './pages/desenvolvedor/MeusProjetos';
+import Configuracoes from './pages/Configuracoes';
+import { SettingsProvider } from './contexts/SettingsContext';
 
 import './admin.css';
 
@@ -152,83 +154,95 @@ function LandingPage() {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Rotas Públicas */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/loginadm" element={<LoginAdm />} />
+      <SettingsProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Rotas Públicas */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/loginadm" element={<LoginAdm />} />
 
-          {/* Painel Administrativo Protegido */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <AdminLayout />
-              </ProtectedRoute>
-            }
-          >
-            {/* Dashboard Visível para Todos os Logados */}
-            <Route index element={<AdminDashboard />} />
+            {/* Painel Administrativo Protegido */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminLayout />
+                </ProtectedRoute>
+              }
+            >
+              {/* Dashboard Visível para Todos os Logados */}
+              <Route index element={<AdminDashboard />} />
 
-            {/* Rotas exclusivas de Vendedores e Administradores */}
-            <Route
-              path="cadastrar-venda"
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'vendedor']}>
-                  <CadastrarVenda />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="entregas"
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'vendedor']}>
-                  <PainelEntregas />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="historico"
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'vendedor']}>
-                  <HistoricoVendas />
-                </ProtectedRoute>
-              }
-            />
+              {/* Rota de Configurações Visível para Todos os Logados */}
+              <Route
+                path="configuracoes"
+                element={
+                  <ProtectedRoute>
+                    <Configuracoes />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Rotas exclusivas de Desenvolvedores e Administradores */}
-            <Route
-              path="fila-projetos"
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'desenvolvedor']}>
-                  <FilaProjetos />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="meus-projetos"
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'desenvolvedor']}>
-                  <MeusProjetos />
-                </ProtectedRoute>
-              }
-            />
+              {/* Rotas exclusivas de Vendedores e Administradores */}
+              <Route
+                path="cadastrar-venda"
+                element={
+                  <ProtectedRoute allowedRoles={['admin', 'vendedor']}>
+                    <CadastrarVenda />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="entregas"
+                element={
+                  <ProtectedRoute allowedRoles={['admin', 'vendedor']}>
+                    <PainelEntregas />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="historico"
+                element={
+                  <ProtectedRoute allowedRoles={['admin', 'vendedor']}>
+                    <HistoricoVendas />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Rota exclusiva do Administrador */}
-            <Route
-              path="gerenciar-usuarios"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <GerenciarUsuarios />
-                </ProtectedRoute>
-              }
-            />
-          </Route>
+              {/* Rotas exclusivas de Desenvolvedores e Administradores */}
+              <Route
+                path="fila-projetos"
+                element={
+                  <ProtectedRoute allowedRoles={['admin', 'desenvolvedor']}>
+                    <FilaProjetos />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="meus-projetos"
+                element={
+                  <ProtectedRoute allowedRoles={['admin', 'desenvolvedor']}>
+                    <MeusProjetos />
+                  </ProtectedRoute>
+                }
+              />
 
-          {/* Redirecionar rotas não encontradas para a página inicial */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
+              {/* Rota exclusiva do Administrador */}
+              <Route
+                path="gerenciar-usuarios"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <GerenciarUsuarios />
+                  </ProtectedRoute>
+                }
+              />
+            </Route>
+
+            {/* Redirecionar rotas não encontradas para a página inicial */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </SettingsProvider>
     </AuthProvider>
   );
 }

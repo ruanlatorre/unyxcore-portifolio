@@ -36,6 +36,9 @@ export default function ConvidarColaborador({ sale, onClose }) {
           .map((doc) => {
             const devData = doc.data();
             const devId = doc.id;
+            if (devData.nome) {
+              devData.nome = devData.nome.replace(/Unyxcore/gi, 'Unyx Core');
+            }
             
             // Projetos onde o dev é o principal (devId) ou colaborador (collaboratorId)
             const activeCount = activeSales.filter(

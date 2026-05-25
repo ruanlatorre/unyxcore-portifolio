@@ -27,7 +27,7 @@ export function AuthProvider({ children }) {
             const data = userDoc.data();
             const userPayload = {
               uid: firebaseUser.uid,
-              nome: data.nome || data.name || 'Usuário',
+              nome: (data.nome || data.name || 'Usuário').replace(/Unyxcore/gi, 'Unyx Core'),
               email: firebaseUser.email,
               role: data.role || 'user',
             };
@@ -81,7 +81,7 @@ export function AuthProvider({ children }) {
     isVendedor: userData?.role === 'vendedor',
     isDev: userData?.role === 'desenvolvedor',
     role: userData?.role || null,
-    userName: userData?.nome || userData?.name || user?.email || 'Usuário',
+    userName: (userData?.nome || userData?.name || user?.email || 'Usuário').replace(/Unyxcore/gi, 'Unyx Core'),
   };
 
   return (
